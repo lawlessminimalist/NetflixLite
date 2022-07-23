@@ -1,12 +1,12 @@
 import './App.css';
 import { useEffect, useState, useRef} from 'react';
+import Dropdown from 'react-bootstrap/Dropdown';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 
 function App() {
-  const vid = document.getElementById('video');
   const videoRef = useRef();
-  
-
+  let vid = document.getElementById('video');
   const [quality,setQuality] = useState('360p');
   const [timestamp,setTimestamp] = useState(0);
 
@@ -14,8 +14,13 @@ function App() {
   
   
   useEffect(()=>{ 
-    videoRef.current?.load();
-    vid.currentTime = timestamp;
+    // Skip proccess on first time render
+    if(!vid){
+      vid = document.getElementById('video');
+   }
+      videoRef.current?.load();
+      vid.currentTime = timestamp;
+    
     },[quality,vid,timestamp])
 
 
@@ -26,8 +31,16 @@ function App() {
           <source src={url} type="video/mp4"/>
         </video>
         <div className='videoControls'>
-          <button id='360p' onClick={() => {setQuality('360p');setTimestamp(vid.currentTime)}}>360p</button>
-          <button id='720p' onClick={() => {setQuality('720p');setTimestamp(vid.currentTime)}}>720p</button>
+          <Dropdown>
+          <Dropdown.Toggle variant="link" size="lg">
+              &#x2699;
+          </Dropdown.Toggle>
+
+          <Dropdown.Menu>
+            <Dropdown.Item onClick={() => {setQuality('360p');setTimestamp(vid.currentTime)}}>360p</Dropdown.Item>
+            <Dropdown.Item onClick={() => {setQuality('720p');setTimestamp(vid.currentTime)}}>720p</Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown>
         </div>
       </div>
     </div>
