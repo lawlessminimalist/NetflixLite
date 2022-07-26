@@ -10,7 +10,7 @@ function App() {
   const [quality,setQuality] = useState('360p');
   const [timestamp,setTimestamp] = useState(0);
 
-  let url = `https://video-bucket-aws.s3.ap-southeast-2.amazonaws.com/${quality}/videoplayback.mp4`
+  let url = `https://video-bucket-aws.s3.ap-southeast-2.amazonaws.com/${quality}/video/videoplayback_${quality}_video.mp4`
   
   
   useEffect(()=>{ 

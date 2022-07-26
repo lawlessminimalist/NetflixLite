@@ -12,28 +12,44 @@ function App() {
 
   // Switching to a Media Source rather than a URL for the video location
 
-  const myMediaSource = new MediaSource();
-  const url = URL.createObjectURL(myMediaSource)
 
-  let url = `https://video-bucket-aws.s3.ap-southeast-2.amazonaws.com/${quality}/videoplayback.mp4`
+  let vidURL = `https://video-bucket-aws.s3.ap-southeast-2.amazonaws.com/${quality}/videoplayback.mp4`
+  const mimeCodec = 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"';
+    if (videoRef.current && MediaSource.isTypeSupported(mimeCodec)) {
+      const myMediaSource = new MediaSource();
+      const source = URL.createObjectURL(myMediaSource)
+
+      videoRef.current.src = source;
   
-  
+    myMediaSource.addEventListener('sourceopen', () => {
+      const audioSourceBuffer = myMediaSource
+      .addSourceBuffer('audio/mp4; codecs="mp4a.40.2"');
+
+      const videoSourceBuffer = myMediaSource
+      .addSourceBuffer('video/mp4; codecs="avc1.64001e"');
+
+      fetch(vidURL).then((response) => {
+        return response.arrayBuffer();
+    }).then((videoData) => {
+        videoSourceBuffer.appendBuffer(videoData);
+    });  
+  })}
+
   useEffect(()=>{ 
     // Skip proccess on first time render
     if(!vid){
       vid = document.getElementById('video');
-   }
+
+    }
       videoRef.current?.load();
       vid.currentTime = timestamp;
     
     },[quality,vid,timestamp])
 
-
   return (
     <div className="App">
       <div className="videoPanel">
         <video id="video" controls autoPlay muted ref={videoRef} >
-          <source src={url} type="video/mp4"/>
         </video>
         <div className='videoControls'>
           <Dropdown>
