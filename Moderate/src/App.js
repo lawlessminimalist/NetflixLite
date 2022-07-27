@@ -6,15 +6,15 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   const videoRef = useRef();
-  let vid = document.getElementById('video');
   const [quality,setQuality] = useState('360p');
   const [timestamp,setTimestamp] = useState(0);
 
   // Switching to a Media Source rather than a URL for the video location
 
+  let vid = document.getElementById('video');
 
-  let vidURL = `https://video-bucket-aws.s3.ap-southeast-2.amazonaws.com/${quality}/video/videoplayback_${quality}_video.webm`
   let getVid = (async () => {
+    vid = document.getElementById('video');
 
     // Create a MediaSource instance and connect it to video element
     const mediaSource = new MediaSource();
@@ -23,12 +23,18 @@ function App() {
     vid.src = URL.createObjectURL(mediaSource);
   
     // Video that will be fetched and appended
-  
+    let vidURL = `https://video-bucket-aws.s3.ap-southeast-2.amazonaws.com/${quality}/video/videoplayback.webm`
+    let audioURL = `https://video-bucket-aws.s3.ap-southeast-2.amazonaws.com/${quality}/audio/videoplayback_${quality}_audio.mp4.webm`
     // Fetch remote URL, getting contents as binary blob
     const vidBlob = await (await fetch(vidURL)).blob();
-      console.log(vidURL)
+
+    // Split the blob into quarters to reduce the size of the video
+    const slice_size = vidBlob.size/4;
     // We need array buffers to work with media source
-    const vidBuff = await vidBlob.arrayBuffer();
+    let vidBuff0 = await vidBlob.slice(0,slice_size).arrayBuffer();
+    let vidBuff1 = await vidBlob.slice(slice_size,slice_size*2).arrayBuffer();
+    let vidBuff2 = await vidBlob.slice(slice_size*2,slice_size*3).arrayBuffer();
+    let vidBuff3 = await vidBlob.slice(slice_size*3,slice_size*4).arrayBuffer();
   
     /**
      * Before we can actually add the video, we need to:
@@ -36,36 +42,50 @@ function App() {
      *  - Wait for the SourceBuffer to "open"
      */
     /** @type {SourceBuffer} */
-    const sourceBuffer = await new Promise((resolve, reject) => {
-      const getSourceBuffer = () => {
-        try {
-          const sourceBuffer = mediaSource.addSourceBuffer(`video/webm; codecs="vp9,opus"`);
-          resolve(sourceBuffer);
-        } catch (e) {
-          reject(e);
-        }
-      };
-      if (mediaSource.readyState === 'open') {
-        getSourceBuffer();
-      } else {
-        mediaSource.addEventListener('sourceopen', getSourceBuffer);
-      }
-    });
-  
-    // Now that we have an "open" source buffer, we can append to it
-    sourceBuffer.appendBuffer(vidBuff);
-    // Listen for when append has been accepted and
-    // You could alternative use `.addEventListener` here instead
+    /** @type {SourceBuffer} */
+	const sourceBuffer = await new Promise((resolve, reject) => {
+		const getSourceBuffer = () => {
+			try {
+				const sourceBuffer = mediaSource.addSourceBuffer(`video/webm; codecs="vp9,opus"`);
+				resolve(sourceBuffer);
+			} catch (e) {
+				reject(e);
+			}
+		};
+		if (mediaSource.readyState === 'open') {
+			getSourceBuffer();
+		} else {
+			mediaSource.addEventListener('sourceopen', getSourceBuffer);
+		}
+	});
+	console.log({
+		sourceBuffer,
+		mediaSource,
+		vid
+	});
+
+  let buffers = [vidBuff0,vidBuff1,vidBuff2,vidBuff3]
+
+  buffers.forEach((buffer) => {
+    let duration = 0;
+    sourceBuffer.appendBuffer(buffer);
+    
     sourceBuffer.onupdateend = () => {
       // Nothing else to load
       mediaSource.endOfStream();
+      // Update Video Buffer Duration Appended
+      var delta = vidBuff0.duration;
+      duration += delta;
+      sourceBuffer.timestampOffset = duration;
       // Start playback!
       // Note: this will fail if video is not muted, due to rules about
       // autoplay and non-muted videos
       vid.play();
     };
-  });
+  }
+  )
 
+});
   useEffect(()=>{ 
     // Skip proccess on first time render
     if(!vid){
