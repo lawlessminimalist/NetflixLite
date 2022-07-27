@@ -10,8 +10,8 @@ function App() {
   const [quality,setQuality] = useState('360p');
   const [timestamp,setTimestamp] = useState(0);
 
-  let url = `https://video-bucket-aws.s3.ap-southeast-2.amazonaws.com/${quality}/video/videoplayback.webm`
-  console.log(url)
+  let url = `https://video-bucket-aws.s3.ap-southeast-2.amazonaws.com/${quality}/video/videoplayback_${quality}_video.mp4`
+  
   
   useEffect(()=>{ 
     // Skip proccess on first time render
@@ -28,7 +28,7 @@ function App() {
     <div className="App">
       <div className="videoPanel">
         <video id="video" controls autoPlay muted ref={videoRef} >
-          <source src={url} type="video/webm"/>
+          <source src={url} type="video/mp4"/>
         </video>
         <div className='videoControls'>
           <Dropdown>
