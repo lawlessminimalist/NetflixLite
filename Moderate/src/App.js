@@ -24,18 +24,31 @@ function App() {
   
     // Video that will be fetched and appended
     let vidURL = `https://video-bucket-aws.s3.ap-southeast-2.amazonaws.com/${quality}/video/videoplayback.webm`
-    let audioURL = `https://video-bucket-aws.s3.ap-southeast-2.amazonaws.com/${quality}/audio/videoplayback_${quality}_audio.mp4.webm`
+    let audioURL = `https://video-bucket-aws.s3.ap-southeast-2.amazonaws.com/${quality}/audio/videoplayback_${quality}_audio.mp4`
+    console.log(audioURL)
+   
     // Fetch remote URL, getting contents as binary blob
     const vidBlob = await (await fetch(vidURL)).blob();
+    const audioBlob = await(await fetch(audioURL)).blob();
+
+
+    // Client side slicing - NOT usually how this works but sourcebuffers are
+    // incredibly tempermental  
 
     // Split the blob into quarters to reduce the size of the video
-    const slice_size = vidBlob.size/4;
+    const vid_slice_size = vidBlob.size/4; 
+    const audio_slice_size = audioBlob.size/4; 
     // We need array buffers to work with media source
-    let vidBuff0 = await vidBlob.slice(0,slice_size).arrayBuffer();
-    let vidBuff1 = await vidBlob.slice(slice_size,slice_size*2).arrayBuffer();
-    let vidBuff2 = await vidBlob.slice(slice_size*2,slice_size*3).arrayBuffer();
-    let vidBuff3 = await vidBlob.slice(slice_size*3,slice_size*4).arrayBuffer();
-  
+    const vidBuff0 = await vidBlob.slice(0,vid_slice_size).arrayBuffer();
+    const vidBuff1 = await vidBlob.slice(vid_slice_size,vid_slice_size*2).arrayBuffer();
+    const vidBuff2 = await vidBlob.slice(vid_slice_size*2,vid_slice_size*3).arrayBuffer();
+    const vidBuff3 = await vidBlob.slice(vid_slice_size*3,vid_slice_size*4).arrayBuffer();
+    
+    const audioBuff0 = await audioBlob.slice(0,vid_slice_size).arrayBuffer();
+    const audioBuff1 = await audioBlob.slice(vid_slice_size,vid_slice_size*2).arrayBuffer();
+    const audioBuff2 = await audioBlob.slice(vid_slice_size*2,vid_slice_size*3).arrayBuffer();
+    const audioBuff3 = await audioBlob.slice(vid_slice_size*3,vid_slice_size*4).arrayBuffer();
+
     /**
      * Before we can actually add the video, we need to:
      *  - Create a SourceBuffer, attached to the MediaSource object
@@ -43,7 +56,8 @@ function App() {
      */
     /** @type {SourceBuffer} */
     /** @type {SourceBuffer} */
-	const sourceBuffer = await new Promise((resolve, reject) => {
+	
+    const sourceBuffer = await new Promise((resolve, reject) => {
 		const getSourceBuffer = () => {
 			try {
 				const sourceBuffer = mediaSource.addSourceBuffer(`video/webm; codecs="vp9,opus"`);
@@ -58,18 +72,35 @@ function App() {
 			mediaSource.addEventListener('sourceopen', getSourceBuffer);
 		}
 	});
+
+  // const audioSourceBuffer = await new Promise((resolve, reject) => {
+	// 	const getSourceBuffer = () => {
+	// 		try {
+	// 			const audioSourceBuffer = mediaSource.addSourceBuffer('audio/mp4; codecs="mp4a.40.2"');
+	// 			resolve(audioSourceBuffer);
+	// 		} catch (e) {
+	// 			reject(e);
+	// 		}
+	// 	};
+	// 	if (mediaSource.readyState === 'open') {
+	// 		getSourceBuffer();
+	// 	} else {
+	// 		mediaSource.addEventListener('sourceopen', getSourceBuffer);
+	// 	}
+	// });
+  
 	console.log({
 		sourceBuffer,
 		mediaSource,
 		vid
 	});
 
-  let buffers = [vidBuff0,vidBuff1,vidBuff2,vidBuff3]
-
-  buffers.forEach((buffer) => {
+  let buffers = [(vidBuff0,audioBuff0),(vidBuff1,audioBuff1),(vidBuff2,audioBuff2),(vidBuff3,audioBuff3)]
+  
+  buffers.forEach((vidBuff,_) => {
     let duration = 0;
-    sourceBuffer.appendBuffer(buffer);
-    
+    sourceBuffer.appendBuffer(vidBuff);
+    //audioSourceBuffer.appendBuffer(audioBuff)
     sourceBuffer.onupdateend = () => {
       // Nothing else to load
       mediaSource.endOfStream();
