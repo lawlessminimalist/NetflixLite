@@ -1,0 +1,20 @@
+{
+  "version": "36.0.0",
+  "files": {
+    "c70fefa6d760e8f6cb28595bfaa37ec2cbbc2505d559a0afe7b0f7447e9545f2": {
+      "source": {
+        "path": "Easy-dev.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-ap-southeast-2": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-ap-southeast-2",
+          "objectKey": "c70fefa6d760e8f6cb28595bfaa37ec2cbbc2505d559a0afe7b0f7447e9545f2.json",
+          "region": "ap-southeast-2",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-ap-southeast-2"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

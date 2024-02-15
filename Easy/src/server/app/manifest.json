@@ -1,0 +1,10 @@
+{
+    "description":"This manifest file contains the metadata of all the video files hosted in the server, it is manually filled with the initial contents and automatically appended to by the server",
+    "videos":[
+        {
+            "id":"f868f0c6-f94f-4b4e-a7cf-1d0854dce705",
+            "name":"Kusatsu Onsen - Cooling the water down",
+            "resolutions":["1080"]
+        }
+    ]
+}
