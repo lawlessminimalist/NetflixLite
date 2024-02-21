@@ -67,6 +67,10 @@
       "type": "build"
     },
     {
+      "name": "autoprefixer",
+      "type": "runtime"
+    },
+    {
       "name": "aws-cdk-lib",
       "version": "^2.1.0",
       "type": "runtime"
@@ -74,6 +78,14 @@
     {
       "name": "constructs",
       "version": "^10.0.5",
+      "type": "runtime"
+    },
+    {
+      "name": "postcss",
+      "type": "runtime"
+    },
+    {
+      "name": "tailwindcss",
       "type": "runtime"
     }
   ],
