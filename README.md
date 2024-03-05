@@ -1,7 +1,7 @@
 # Netflix Lite™
 A not-quite-as-sophisticated attempt at how Netflix / Youtube stream their video content for wide-spread consumption.
 
-## Overviews g
+## Overview
 
 I'm going to break this down into multiple stages, each of increasing complexity in their methodology and implementation; with the aim being that at the end of this both you ☝ and I 👇 have a better understanding of how video streaming is done by these video wizards.
 
